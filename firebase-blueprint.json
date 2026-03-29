@@ -1,0 +1,189 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the application",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "User's email address"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "User's display name"
+        },
+        "photoURL": {
+          "type": "string",
+          "format": "uri",
+          "description": "User's profile photo URL"
+        },
+        "createdAt": {
+          "type": "timestamp",
+          "description": "When the user was created"
+        }
+      },
+      "required": ["email", "createdAt"]
+    },
+    "Screenshot": {
+      "title": "Screenshot",
+      "description": "A design inspiration screenshot saved by a user",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the screenshot"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the screenshot image"
+        },
+        "title": {
+          "type": "string",
+          "description": "Title of the screenshot"
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "AI generated tags"
+        },
+        "screenType": {
+          "type": "string",
+          "description": "Primary screen type (e.g., Dashboard)"
+        },
+        "components": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Detected UI components"
+        },
+        "colorPalette": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Dominant hex color codes"
+        },
+        "dateAdded": {
+          "type": "string",
+          "description": "When the screenshot was added (ISO string)"
+        }
+      },
+      "required": ["id", "url", "title", "tags", "screenType", "components", "colorPalette", "dateAdded"]
+    },
+    "Board": {
+      "title": "Board",
+      "description": "A collection of screenshots",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the board"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the board"
+        },
+        "coverUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the cover image"
+        },
+        "screenshotIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "IDs of the screenshots in this board"
+        },
+        "dateCreated": {
+          "type": "string",
+          "description": "When the board was created (ISO string)"
+        }
+      },
+      "required": ["id", "name", "screenshotIds", "dateCreated"]
+    },
+    "Moodboard": {
+      "title": "Moodboard",
+      "description": "A moodboard of screenshots",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the moodboard"
+        },
+        "name": {
+          "type": "string",
+          "description": "Name of the moodboard"
+        },
+        "description": {
+          "type": "string",
+          "description": "Description of the moodboard"
+        },
+        "coverUrl": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL of the cover image"
+        },
+        "screenshotIds": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "IDs of the screenshots in this moodboard"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          },
+          "description": "Items placed on the moodboard canvas"
+        },
+        "order": {
+          "type": "number",
+          "description": "Order of the moodboard in the list"
+        },
+        "dateCreated": {
+          "type": "string",
+          "description": "When the moodboard was created (ISO string)"
+        },
+        "dateUpdated": {
+          "type": "string",
+          "description": "When the moodboard was last updated (ISO string)"
+        }
+      },
+      "required": ["id", "name", "screenshotIds", "dateCreated", "dateUpdated"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/User"
+      },
+      "description": "User profiles"
+    },
+    "/users/{userId}/screenshots/{screenshotId}": {
+      "schema": {
+        "$ref": "#/entities/Screenshot"
+      },
+      "description": "Screenshots saved by the user"
+    },
+    "/users/{userId}/boards/{boardId}": {
+      "schema": {
+        "$ref": "#/entities/Board"
+      },
+      "description": "Boards created by the user"
+    },
+    "/users/{userId}/moodboards/{moodboardId}": {
+      "schema": {
+        "$ref": "#/entities/Moodboard"
+      },
+      "description": "Moodboards created by the user"
+    }
+  }
+}
