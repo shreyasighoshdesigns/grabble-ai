@@ -18,10 +18,10 @@ export function CreateMoodboardModal({ onClose, onCreate }: CreateMoodboardModal
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
-        <div className="flex items-center justify-between p-6 border-b border-zinc-100">
-          <h2 className="text-xl font-semibold text-zinc-900">Create Moodboard</h2>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4">
+      <div className="bg-white rounded-t-2xl sm:rounded-2xl w-full max-w-md overflow-hidden shadow-xl">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-zinc-100">
+          <h2 className="text-lg sm:text-xl font-semibold text-zinc-900">Create Moodboard</h2>
           <button 
             onClick={onClose}
             className="p-2 hover:bg-zinc-100 rounded-full transition-colors"
@@ -30,7 +30,7 @@ export function CreateMoodboardModal({ onClose, onCreate }: CreateMoodboardModal
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-4">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-zinc-700 mb-1">
               Name

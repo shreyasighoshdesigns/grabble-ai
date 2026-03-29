@@ -172,6 +172,16 @@ export const getBoards = async (userId: string): Promise<Board[]> => {
   }
 };
 
+export const deleteBoard = async (userId: string, boardId: string) => {
+  const path = `users/${userId}/boards/${boardId}`;
+  const docRef = doc(db, `users/${userId}/boards`, boardId);
+  try {
+    await deleteDoc(docRef);
+  } catch (error) {
+    handleFirestoreError(error, OperationType.DELETE, path);
+  }
+};
+
 export const addMoodboard = async (userId: string, moodboard: Moodboard) => {
   const path = `users/${userId}/moodboards/${moodboard.id}`;
   const docRef = doc(db, `users/${userId}/moodboards`, moodboard.id);

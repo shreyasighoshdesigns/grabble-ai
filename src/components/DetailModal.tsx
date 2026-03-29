@@ -126,22 +126,48 @@ export function DetailModal({ screenshot, boards, onClose, onAddToBoard, onUpdat
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 md:p-12">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-6 md:p-12">
       <div className="absolute inset-0 bg-zinc-900/80 backdrop-blur-sm" onClick={onClose} />
-      
-      <div className="relative bg-white rounded-[2rem] shadow-2xl w-full max-w-6xl h-[95vh] sm:h-[90vh] md:h-[85vh] flex flex-col md:flex-row overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-        
+
+      <div className="relative bg-white rounded-t-[1.5rem] sm:rounded-[2rem] shadow-2xl w-full sm:max-w-6xl h-[95dvh] sm:h-[90vh] md:h-[85vh] flex flex-col md:flex-row overflow-hidden animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-300">
+
+        {/* Mobile Close / Action Bar */}
+        <div className="md:hidden flex items-center justify-between px-4 py-3 border-b border-zinc-100 bg-white shrink-0">
+          <button onClick={onClose} className="p-2 text-zinc-500 hover:bg-zinc-100 rounded-full transition-colors">
+            <X className="w-5 h-5" />
+          </button>
+          <div className="flex items-center gap-1">
+            {onDeleteScreenshot && (
+              showDeleteConfirm ? (
+                <div className="flex items-center gap-1 bg-zinc-100 rounded-full px-2 py-1">
+                  <span className="text-xs font-medium text-zinc-700">Delete?</span>
+                  <button onClick={() => onDeleteScreenshot(screenshot.id)} className="p-1 text-red-600 rounded-full"><Check className="w-4 h-4" /></button>
+                  <button onClick={() => setShowDeleteConfirm(false)} className="p-1 text-zinc-500 rounded-full"><X className="w-4 h-4" /></button>
+                </div>
+              ) : (
+                <button onClick={() => setShowDeleteConfirm(true)} className="p-2 text-zinc-500 hover:text-red-600 rounded-full transition-colors"><Trash2 className="w-5 h-5" /></button>
+              )
+            )}
+            <button onClick={handleCopy} className="p-2 text-zinc-500 hover:text-zinc-900 rounded-full transition-colors">
+              {isCopied ? <Check className="w-5 h-5 text-emerald-600" /> : <Copy className="w-5 h-5" />}
+            </button>
+            <button onClick={handleDownload} className="p-2 text-zinc-500 hover:text-zinc-900 rounded-full transition-colors">
+              <Download className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+
         {/* Image Section */}
-        <div className="w-full md:w-2/3 h-[40%] md:h-full shrink-0 bg-zinc-100 relative flex items-center justify-center overflow-hidden group">
-          <img 
-            src={screenshot.url} 
-            alt={screenshot.title} 
+        <div className="w-full md:w-2/3 h-[35%] sm:h-[40%] md:h-full shrink-0 bg-zinc-100 relative flex items-center justify-center overflow-hidden group">
+          <img
+            src={screenshot.url}
+            alt={screenshot.title}
             className="w-full h-full object-contain"
             referrerPolicy="no-referrer"
           />
-          
-          {/* Top Actions */}
-          <div className="absolute top-4 left-4 right-4 flex justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+
+          {/* Desktop Top Actions (hidden on mobile — use bar above) */}
+          <div className="absolute top-4 left-4 right-4 hidden md:flex justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <button onClick={onClose} className="p-2.5 bg-white/90 backdrop-blur-md text-zinc-900 hover:bg-white rounded-full shadow-sm transition-all">
               <X className="w-5 h-5" />
             </button>
@@ -158,8 +184,8 @@ export function DetailModal({ screenshot, boards, onClose, onAddToBoard, onUpdat
                     </button>
                   </div>
                 ) : (
-                  <button 
-                    onClick={() => setShowDeleteConfirm(true)} 
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
                     className="p-2.5 bg-white/90 backdrop-blur-md text-zinc-600 hover:text-red-600 hover:bg-white rounded-full shadow-sm transition-all"
                     title="Delete Screenshot"
                   >
@@ -167,14 +193,14 @@ export function DetailModal({ screenshot, boards, onClose, onAddToBoard, onUpdat
                   </button>
                 )
               )}
-              <button 
+              <button
                 onClick={handleCopy}
                 className="p-2.5 bg-white/90 backdrop-blur-md text-zinc-900 hover:bg-white rounded-full shadow-sm transition-all"
                 title="Copy Image"
               >
                 {isCopied ? <Check className="w-5 h-5 text-emerald-600" /> : <Copy className="w-5 h-5" />}
               </button>
-              <button 
+              <button
                 onClick={handleDownload}
                 className="p-2.5 bg-white/90 backdrop-blur-md text-zinc-900 hover:bg-white rounded-full shadow-sm transition-all"
                 title="Download Image"
@@ -186,12 +212,12 @@ export function DetailModal({ screenshot, boards, onClose, onAddToBoard, onUpdat
         </div>
 
         {/* Details Section */}
-        <div className="w-full md:w-1/3 bg-white flex flex-col flex-1 h-[60%] md:h-full border-t md:border-t-0 md:border-l border-zinc-100 overflow-hidden min-h-0">
-          <div className="flex-1 overflow-y-auto p-8 space-y-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            
+        <div className="w-full md:w-1/3 bg-white flex flex-col flex-1 md:h-full border-t md:border-t-0 md:border-l border-zinc-100 overflow-hidden min-h-0">
+          <div className="flex-1 overflow-y-auto p-5 sm:p-8 space-y-6 sm:space-y-8 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+
             {/* Header */}
             <div>
-              <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-2 sm:mb-3">
                 <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-zinc-100 text-zinc-600 rounded-full text-xs font-semibold uppercase tracking-wider">
                   <Layers className="w-3.5 h-3.5" />
                   {screenshot.screenType}
@@ -200,9 +226,9 @@ export function DetailModal({ screenshot, boards, onClose, onAddToBoard, onUpdat
                   <MoreHorizontal className="w-5 h-5" />
                 </button>
               </div>
-              <h2 className="text-3xl font-bold text-zinc-900 leading-tight mb-2">{screenshot.title}</h2>
-              <div className="flex items-center gap-2 text-sm text-zinc-500">
-                <Calendar className="w-4 h-4" />
+              <h2 className="text-xl sm:text-3xl font-bold text-zinc-900 leading-tight mb-1 sm:mb-2">{screenshot.title}</h2>
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-zinc-500">
+                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 {new Date(screenshot.dateAdded).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
               </div>
             </div>
@@ -296,11 +322,11 @@ export function DetailModal({ screenshot, boards, onClose, onAddToBoard, onUpdat
                   <Download className="w-4 h-4" />
                 </button>
               </div>
-              <div className="flex gap-3">
+              <div className="flex flex-wrap gap-2.5 sm:gap-3">
                 {screenshot.colorPalette.map(color => (
                   <div key={color} className="group relative cursor-pointer">
-                    <div 
-                      className="w-12 h-12 rounded-full shadow-sm border border-zinc-200 hover:scale-110 transition-transform duration-200"
+                    <div
+                      className="w-10 h-10 sm:w-12 sm:h-12 rounded-full shadow-sm border border-zinc-200 hover:scale-110 transition-transform duration-200"
                       style={{ backgroundColor: color }}
                     />
                     <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-[#a3e635] text-zinc-900 font-bold text-xs py-1.5 px-2.5 rounded-md pointer-events-none whitespace-nowrap z-10 font-mono">
@@ -313,7 +339,7 @@ export function DetailModal({ screenshot, boards, onClose, onAddToBoard, onUpdat
 
           </div>
           
-          <div className="shrink-0 p-6 border-t border-zinc-100 bg-zinc-50/50 relative">
+          <div className="shrink-0 p-4 sm:p-6 border-t border-zinc-100 bg-zinc-50/50 relative">
             {showBoards ? (
               <div className="absolute bottom-full left-6 right-6 mb-2 bg-white rounded-xl shadow-xl border border-zinc-100 p-2 max-h-64 flex flex-col animate-in slide-in-from-bottom-2">
                 <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider px-3 py-2 flex-shrink-0">

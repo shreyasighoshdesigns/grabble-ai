@@ -96,12 +96,13 @@ service cloud.firestore {
     }
 
     function isValidScreenshot() {
-      return hasOnlyAllowedFields(['id', 'url', 'title', 'tags', 'customTags', 'screenType', 'components', 'colorPalette', 'dateAdded']) &&
+      return hasOnlyAllowedFields(['id', 'url', 'title', 'tags', 'customTags', 'screenType', 'category', 'components', 'colorPalette', 'dateAdded']) &&
              hasRequiredFields(['id', 'url', 'title', 'tags', 'screenType', 'components', 'colorPalette', 'dateAdded']) &&
              validStringLength('id', 1, 50) &&
              isValidUrl(request.resource.data.url) &&
              validStringLength('title', 0, 100) &&
              validStringLength('screenType', 0, 50) &&
+             (!('category' in request.resource.data) || validStringLength('category', 1, 50)) &&
              isValidStringList(request.resource.data.tags, 20, 50) &&
              (!('customTags' in request.resource.data) || isValidStringList(request.resource.data.customTags, 20, 50)) &&
              isValidStringList(request.resource.data.components, 20, 50) &&

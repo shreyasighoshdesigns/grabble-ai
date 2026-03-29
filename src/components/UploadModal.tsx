@@ -1,19 +1,23 @@
 import React, { useState, useRef } from 'react';
-import { Screenshot } from '../types';
+import { Screenshot, Board } from '../types';
 import { analyzeScreenshot } from '../services/geminiService';
-import { X, UploadCloud, Loader2, Sparkles, CheckCircle2, Tag } from 'lucide-react';
+import { X, UploadCloud, Loader2, Sparkles, CheckCircle2, Tag, Folder, PlusCircle } from 'lucide-react';
 
 interface UploadModalProps {
+  boards: Board[];
   onClose: () => void;
-  onComplete: (screenshot: Screenshot) => void;
+  onComplete: (screenshot: Screenshot, folderId?: string, newFolderName?: string) => void;
 }
 
-export function UploadModal({ onClose, onComplete }: UploadModalProps) {
+export function UploadModal({ boards, onClose, onComplete }: UploadModalProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [analyzedData, setAnalyzedData] = useState<Partial<Screenshot> | null>(null);
   const [newTag, setNewTag] = useState('');
+  const [selectedFolderId, setSelectedFolderId] = useState<string>('');
+  const [showFolderSelect, setShowFolderSelect] = useState(false);
+  const [newFolderName, setNewFolderName] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = async (file: File) => {
@@ -31,8 +35,8 @@ export function UploadModal({ onClose, onComplete }: UploadModalProps) {
             let width = img.width;
             let height = img.height;
             
-            const MAX_WIDTH = 600;
-            const MAX_HEIGHT = 600;
+            const MAX_WIDTH = 1600;
+            const MAX_HEIGHT = 1600;
             
             if (width > height) {
               if (width > MAX_WIDTH) {
@@ -52,6 +56,11 @@ export function UploadModal({ onClose, onComplete }: UploadModalProps) {
             if (ctx) {
               ctx.fillStyle = '#ffffff';
               ctx.fillRect(0, 0, width, height);
+              
+              // Enable high-quality image smoothing
+              ctx.imageSmoothingEnabled = true;
+              ctx.imageSmoothingQuality = 'high';
+              
               ctx.drawImage(img, 0, 0, width, height);
             }
             
@@ -86,8 +95,18 @@ export function UploadModal({ onClose, onComplete }: UploadModalProps) {
                 .map(entry => entry[0]);
             };
 
+            // Recursively compress if file is too large for Firestore (>900KB base64)
+            let quality = 0.9;
+            let resultBase64 = canvas.toDataURL('image/jpeg', quality);
+            
+            // 900 KB in base64 string length is around 1,200,000 characters
+            while (resultBase64.length > 1200000 && quality > 0.4) {
+              quality -= 0.1;
+              resultBase64 = canvas.toDataURL('image/jpeg', quality);
+            }
+
             resolve({
-              base64: canvas.toDataURL('image/jpeg', 0.5),
+              base64: resultBase64,
               width: img.width,
               height: img.height,
               colors: extractColors()
@@ -107,8 +126,8 @@ export function UploadModal({ onClose, onComplete }: UploadModalProps) {
       const data = await analyzeScreenshot(base64Data, 'image/jpeg', file.name, { width, height }, colors);
       setAnalyzedData({ ...data, customTags: [] });
     } catch (error: any) {
-      console.error("Gemini Analysis failed:", error);
-      alert(`Gemini Intelligence Error:\n${error.message || "Failed to analyze image"}\n\nPlease check your .env file or Google Cloud permissions.`);
+      console.error("Grabble Analysis failed:", error);
+      alert(`Grabble Intelligence Error:\n${error.message || "Failed to analyze image"}\n\nPlease check your .env file or Google Cloud permissions.`);
       setPreviewUrl(null); // Reset UI so they don't get trapped if AI is completely unavailable
     } finally {
       setIsAnalyzing(false);
@@ -177,50 +196,50 @@ export function UploadModal({ onClose, onComplete }: UploadModalProps) {
       dateAdded: new Date().toISOString(),
     };
     
-    onComplete(newScreenshot);
+    onComplete(newScreenshot, selectedFolderId || undefined, newFolderName || undefined);
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-6"
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
       <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm" onClick={onClose} />
-      
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
-          <h2 className="text-xl font-bold text-zinc-900">Upload Inspiration</h2>
+
+      <div className="relative bg-white rounded-t-2xl sm:rounded-3xl shadow-2xl w-full max-w-3xl max-h-[95dvh] sm:max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-zinc-100">
+          <h2 className="text-lg sm:text-xl font-bold text-zinc-900">Upload Inspiration</h2>
           <button onClick={onClose} className="p-2 text-zinc-400 hover:bg-zinc-100 rounded-full transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {!previewUrl ? (
-            <div 
-              className={`border-2 border-dashed rounded-2xl p-12 flex flex-col items-center justify-center text-center transition-colors pointer-events-none ${
+            <div
+              className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 flex flex-col items-center justify-center text-center transition-colors pointer-events-none ${
                 isDragging ? 'border-[#a3e635] bg-[#f4fce3]/50' : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
               }`}
             >
-              <div className="w-16 h-16 bg-zinc-100 rounded-full flex items-center justify-center mb-4">
-                <UploadCloud className="w-8 h-8 text-zinc-500" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 bg-zinc-100 rounded-full flex items-center justify-center mb-4">
+                <UploadCloud className="w-7 h-7 sm:w-8 sm:h-8 text-zinc-500" />
               </div>
-              <h3 className="text-lg font-semibold text-zinc-900 mb-2 pointer-events-auto">Click or drag screenshot here</h3>
+              <h3 className="text-base sm:text-lg font-semibold text-zinc-900 mb-2 pointer-events-auto">Click or drag screenshot here</h3>
               <p className="text-zinc-500 text-sm max-w-sm pointer-events-auto">
-                Upload a UI screenshot. Gemini will automatically analyze it to extract tags, colors, and components.
+                Upload a UI screenshot. Grabble will automatically analyze it to extract tags, colors, and components.
               </p>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                className="hidden" 
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
                 accept="image/*"
                 onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
               />
-              <button 
+              <button
                 onClick={() => fileInputRef.current?.click()}
-                className="mt-6 px-6 py-2 bg-[#a3e635] text-zinc-900 font-bold rounded-xl pointer-events-auto shadow-sm hover:bg-[#84cc16] transition-colors"
+                className="mt-6 pointer-events-auto px-6 py-2.5 bg-zinc-900 text-[#a3e635] text-sm font-bold rounded-full hover:bg-zinc-800 shadow-sm transition-colors whitespace-nowrap active:scale-95"
                >
                 Select File
               </button>
@@ -237,7 +256,7 @@ export function UploadModal({ onClose, onComplete }: UploadModalProps) {
                 {isAnalyzing ? (
                   <div className="flex-1 flex flex-col items-center justify-center py-12 text-zinc-500">
                     <Loader2 className="w-8 h-8 animate-spin mb-4 text-[#a3e635]" />
-                    <p className="font-medium text-zinc-900">Analyzing with Gemini...</p>
+                    <p className="font-medium text-zinc-900">Analyzing with Grabble...</p>
                     <p className="text-sm mt-1">Extracting UI components and colors</p>
                   </div>
                 ) : analyzedData ? (
@@ -358,19 +377,165 @@ export function UploadModal({ onClose, onComplete }: UploadModalProps) {
         </div>
 
         {previewUrl && !isAnalyzing && analyzedData && (
-          <div className="p-6 border-t border-zinc-100 bg-zinc-50 flex justify-end gap-3">
-            <button 
-              onClick={() => { setPreviewUrl(null); setAnalyzedData(null); }}
-              className="px-5 py-2.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
-            >
-              Cancel
-            </button>
-            <button 
-              onClick={handleSave}
-              className="px-6 py-2.5 text-sm font-medium bg-[#a3e635] text-zinc-900 font-bold rounded-xl hover:bg-[#84cc16] transition-colors shadow-sm"
-            >
-              Save to Library
-            </button>
+          <div className="p-4 sm:p-6 border-t border-zinc-100 bg-zinc-50">
+            {/* Desktop layout: folder picker left, cancel + save right */}
+            <div className="hidden sm:flex items-center justify-between">
+              <div className="relative flex items-center">
+                <button
+                  onClick={() => setShowFolderSelect(!showFolderSelect)}
+                  className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors shadow-sm"
+                >
+                  <Folder className="w-4 h-4 text-zinc-500 shrink-0" />
+                  <span className="max-w-[150px] truncate">
+                    {selectedFolderId
+                      ? boards.find(b => b.id === selectedFolderId)?.name || 'Select Folder'
+                      : newFolderName
+                        ? newFolderName
+                        : 'Add to Folder'}
+                  </span>
+                </button>
+
+                {showFolderSelect && (
+                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-white rounded-xl shadow-xl border border-zinc-100 z-50 overflow-hidden flex flex-col animate-in slide-in-from-bottom-2">
+                    <div className="p-2 border-b border-zinc-100">
+                      <input
+                        type="text"
+                        placeholder="Search or create..."
+                        value={newFolderName}
+                        onChange={(e) => {
+                          setNewFolderName(e.target.value);
+                          setSelectedFolderId('');
+                        }}
+                        className="w-full px-3 py-2 text-sm bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a3e635]"
+                      />
+                    </div>
+                    <div className="max-h-48 overflow-y-auto p-2">
+                      {boards
+                        .filter(b => b.name.toLowerCase().includes(newFolderName.toLowerCase()))
+                        .map(board => (
+                          <button
+                            key={board.id}
+                            onClick={() => {
+                              setSelectedFolderId(board.id);
+                              setNewFolderName('');
+                              setShowFolderSelect(false);
+                            }}
+                            className={`w-full flex items-left text-left px-3 py-2 text-sm rounded-lg transition-colors ${
+                              selectedFolderId === board.id ? 'bg-[#f4fce3] text-[#3f6212] font-semibold' : 'text-zinc-700 hover:bg-zinc-50'
+                            }`}
+                          >
+                            <span className="truncate">{board.name}</span>
+                          </button>
+                        ))}
+                      {newFolderName && !boards.some(b => b.name.toLowerCase() === newFolderName.toLowerCase()) && (
+                        <button
+                          onClick={() => {
+                            setSelectedFolderId('');
+                            setShowFolderSelect(false);
+                          }}
+                          className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#84cc16] hover:bg-[#f4fce3] rounded-lg transition-colors"
+                        >
+                          <PlusCircle className="w-4 h-4" />
+                          Create "{newFolderName}"
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3">
+                <button
+                  onClick={() => {
+                    setPreviewUrl(null);
+                    setAnalyzedData(null);
+                    setSelectedFolderId('');
+                    setNewFolderName('');
+                    setShowFolderSelect(false);
+                  }}
+                  className="px-5 py-2.5 text-sm font-medium text-zinc-600 hover:text-zinc-900 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSave}
+                  className="px-6 py-2.5 text-sm font-medium bg-[#a3e635] text-zinc-900 font-bold rounded-xl hover:bg-[#84cc16] transition-colors shadow-sm"
+                >
+                  Save to Library
+                </button>
+              </div>
+            </div>
+
+            {/* Mobile layout: two equal buttons — Add to Folder + Save to Library */}
+            <div className="flex sm:hidden gap-2 relative">
+              <button
+                onClick={() => setShowFolderSelect(!showFolderSelect)}
+                className="flex-1 flex items-center justify-center py-3 text-sm font-bold text-zinc-700 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors shadow-sm active:scale-95"
+              >
+                <span className="truncate">
+                  {selectedFolderId
+                    ? boards.find(b => b.id === selectedFolderId)?.name || 'Folder'
+                    : newFolderName
+                      ? newFolderName
+                      : 'Add to Folder'}
+                </span>
+              </button>
+
+              {showFolderSelect && (
+                <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-xl shadow-xl border border-zinc-100 z-50 overflow-hidden flex flex-col animate-in slide-in-from-bottom-2">
+                  <div className="p-2 border-b border-zinc-100">
+                    <input
+                      type="text"
+                      placeholder="Search or create..."
+                      value={newFolderName}
+                      onChange={(e) => {
+                        setNewFolderName(e.target.value);
+                        setSelectedFolderId('');
+                      }}
+                      className="w-full px-3 py-2 text-sm bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#a3e635]"
+                    />
+                  </div>
+                  <div className="max-h-48 overflow-y-auto p-2">
+                    {boards
+                      .filter(b => b.name.toLowerCase().includes(newFolderName.toLowerCase()))
+                      .map(board => (
+                        <button
+                          key={board.id}
+                          onClick={() => {
+                            setSelectedFolderId(board.id);
+                            setNewFolderName('');
+                            setShowFolderSelect(false);
+                          }}
+                          className={`w-full flex items-left text-left px-3 py-2 text-sm rounded-lg transition-colors ${
+                            selectedFolderId === board.id ? 'bg-[#f4fce3] text-[#3f6212] font-semibold' : 'text-zinc-700 hover:bg-zinc-50'
+                          }`}
+                        >
+                          <span className="truncate">{board.name}</span>
+                        </button>
+                      ))}
+                    {newFolderName && !boards.some(b => b.name.toLowerCase() === newFolderName.toLowerCase()) && (
+                      <button
+                        onClick={() => {
+                          setSelectedFolderId('');
+                          setShowFolderSelect(false);
+                        }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm font-medium text-[#84cc16] hover:bg-[#f4fce3] rounded-lg transition-colors"
+                      >
+                        <PlusCircle className="w-4 h-4" />
+                        Create "{newFolderName}"
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={handleSave}
+                className="flex-1 py-3 text-sm font-bold bg-[#a3e635] text-zinc-900 rounded-xl hover:bg-[#84cc16] transition-colors shadow-sm active:scale-95"
+              >
+                Save to Library
+              </button>
+            </div>
           </div>
         )}
       </div>

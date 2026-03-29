@@ -56,24 +56,24 @@ export function FindSimilarModal({ screenshots, onClose, onSelectScreenshot }: F
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-6">
       <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm" onClick={onClose} />
-      
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
+
+      <div className="relative bg-white rounded-t-2xl sm:rounded-3xl shadow-2xl w-full max-w-4xl max-h-[95dvh] sm:max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-zinc-100">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-[#a3e635]" />
-            <h2 className="text-xl font-bold text-zinc-900">Find Similar UI</h2>
+            <h2 className="text-lg sm:text-xl font-bold text-zinc-900">Find Similar UI</h2>
           </div>
           <button onClick={onClose} className="p-2 text-zinc-400 hover:bg-zinc-100 rounded-full transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {!previewUrl ? (
-            <div 
-              className={`border-2 border-dashed rounded-2xl p-16 flex flex-col items-center justify-center text-center transition-colors ${
+            <div
+              className={`border-2 border-dashed rounded-2xl p-8 sm:p-16 flex flex-col items-center justify-center text-center transition-colors cursor-pointer ${
                 isDragging ? 'border-[#a3e635] bg-[#f4fce3]/50' : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
               }`}
               onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
@@ -81,31 +81,31 @@ export function FindSimilarModal({ screenshots, onClose, onSelectScreenshot }: F
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
             >
-              <div className="w-20 h-20 bg-[#f4fce3] rounded-full flex items-center justify-center mb-6">
-                <ImageIcon className="w-10 h-10 text-[#a3e635]" />
+              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-[#f4fce3] rounded-full flex items-center justify-center mb-4 sm:mb-6">
+                <ImageIcon className="w-8 h-8 sm:w-10 sm:h-10 text-[#a3e635]" />
               </div>
-              <h3 className="text-2xl font-bold text-zinc-900 mb-3">Upload a wireframe or screenshot</h3>
-              <p className="text-zinc-500 text-lg max-w-md">
+              <h3 className="text-xl sm:text-2xl font-bold text-zinc-900 mb-2 sm:mb-3">Upload a wireframe or screenshot</h3>
+              <p className="text-zinc-500 text-sm sm:text-lg max-w-md">
                 Gemini will analyze the layout and visual structure to find matching inspiration from your library.
               </p>
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                className="hidden" 
+              <input
+                type="file"
+                ref={fileInputRef}
+                className="hidden"
                 accept="image/*"
                 onChange={(e) => e.target.files?.[0] && handleFile(e.target.files[0])}
               />
             </div>
           ) : (
-            <div className="flex flex-col gap-8">
-              <div className="flex items-center gap-6 p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
-                <div className="w-32 h-32 bg-zinc-200 rounded-xl overflow-hidden shrink-0">
+            <div className="flex flex-col gap-6 sm:gap-8">
+              <div className="flex items-center gap-4 sm:gap-6 p-3 sm:p-4 bg-zinc-50 rounded-2xl border border-zinc-100">
+                <div className="w-20 h-20 sm:w-32 sm:h-32 bg-zinc-200 rounded-xl overflow-hidden shrink-0">
                   <img src={previewUrl} alt="Reference" className="w-full h-full object-cover" />
                 </div>
-                <div>
-                  <h3 className="text-lg font-semibold text-zinc-900 mb-1">Reference Image</h3>
-                  <p className="text-zinc-500 text-sm mb-3">Finding layouts with similar structure and components...</p>
-                  <button 
+                <div className="min-w-0">
+                  <h3 className="text-base sm:text-lg font-semibold text-zinc-900 mb-1">Reference Image</h3>
+                  <p className="text-zinc-500 text-xs sm:text-sm mb-2 sm:mb-3">Finding layouts with similar structure and components...</p>
+                  <button
                     onClick={() => { setPreviewUrl(null); setResults([]); }}
                     className="text-sm font-medium text-[#84cc16] hover:text-[#3f6212]"
                   >

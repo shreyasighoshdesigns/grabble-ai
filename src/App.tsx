@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react';
-import { Screenshot, Board, SmartFolder, Moodboard } from './types';
+import { Screenshot, Board, SmartFolder, Moodboard, normalizeScreenType } from './types';
 import { Sidebar } from './components/Sidebar';
 import { Topbar } from './components/Topbar';
 import { BottomNav } from './components/BottomNav';
@@ -17,7 +17,7 @@ import { LandingPage } from './screens/LandingPage';
 import { SearchResults } from './screens/SearchResults';
 import { auth, logOut, getRedirectResult } from './firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { createUserProfile, getScreenshots, getBoards, getMoodboards, addScreenshot, addBoard, updateBoard, updateScreenshot, deleteScreenshot, addMoodboard, updateMoodboard, deleteMoodboard } from './services/firebaseService';
+import { createUserProfile, getScreenshots, getBoards, getMoodboards, addScreenshot, addBoard, updateBoard, deleteBoard, updateScreenshot, deleteScreenshot, addMoodboard, updateMoodboard, deleteMoodboard } from './services/firebaseService';
 import { Loader2 } from 'lucide-react';
 
 export type ViewState = 'landing' | 'home' | 'boards' | 'search' | 'boardDetail' | 'moodboards' | 'moodboardDetail';
@@ -53,31 +53,18 @@ export default function App() {
   const smartFolders = useMemo(() => {
     const folders: SmartFolder[] = [];
     
-    // Group by screenType
+    // Group by normalized screenType exclusively to prevent repetitive images across multiple folders
     const screenTypes = new Map<string, number>();
     screenshots.forEach(s => {
-      if (s.screenType) {
-        screenTypes.set(s.screenType, (screenTypes.get(s.screenType) || 0) + 1);
+      if (s.screenType && s.screenType !== 'Unknown') {
+        const normalizedType = normalizeScreenType(s.screenType);
+        screenTypes.set(normalizedType, (screenTypes.get(normalizedType) || 0) + 1);
       }
     });
     
     screenTypes.forEach((count, type) => {
       if (count >= 1) {
-        folders.push({ name: `${type}s`, type: 'screenType', value: type, count });
-      }
-    });
-
-    // Group by components
-    const components = new Map<string, number>();
-    screenshots.forEach(s => {
-      s.components?.forEach(c => {
-        components.set(c, (components.get(c) || 0) + 1);
-      });
-    });
-
-    components.forEach((count, comp) => {
-      if (count >= 1) {
-        folders.push({ name: `${comp}s`, type: 'component', value: comp, count });
+        folders.push({ name: type, type: 'screenType', value: type, count });
       }
     });
 
@@ -138,11 +125,34 @@ export default function App() {
     }
   };
 
-  const handleUploadComplete = async (newScreenshot: Screenshot) => {
+  const handleUploadComplete = async (newScreenshot: Screenshot, folderId?: string, newFolderName?: string) => {
     if (user) {
       try {
         await addScreenshot(user.uid, newScreenshot);
-        setScreenshots([newScreenshot, ...screenshots]);
+        setScreenshots(prev => [newScreenshot, ...prev]);
+
+        if (newFolderName) {
+          const newBoard: Board = {
+            id: Math.random().toString(36).substring(7),
+            name: newFolderName.substring(0, 100),
+            screenshotIds: [newScreenshot.id],
+            dateCreated: new Date().toISOString(),
+            coverUrl: newScreenshot.url
+          };
+          await addBoard(user.uid, newBoard);
+          setBoards(prev => [newBoard, ...prev]);
+        } else if (folderId) {
+          const board = boards.find(b => b.id === folderId);
+          if (board) {
+            const updatedBoard = {
+              ...board,
+              screenshotIds: [...board.screenshotIds, newScreenshot.id],
+              coverUrl: board.coverUrl || newScreenshot.url
+            };
+            await updateBoard(user.uid, updatedBoard);
+            setBoards(prev => prev.map(b => b.id === folderId ? updatedBoard : b));
+          }
+        }
       } catch (error) {
         console.error("Error saving screenshot:", error);
       }
@@ -456,8 +466,9 @@ export default function App() {
   const handleUpdateScreenshot = async (updatedScreenshot: Screenshot) => {
     if (!user) return;
     try {
-      setScreenshots(screenshots.map(s => s.id === updatedScreenshot.id ? updatedScreenshot : s));
+      setScreenshots(prev => prev.map(s => s.id === updatedScreenshot.id ? updatedScreenshot : s));
       if (selectedScreenshot?.id === updatedScreenshot.id) {
+
         setSelectedScreenshot(updatedScreenshot);
       }
       await updateScreenshot(user.uid, updatedScreenshot);
@@ -474,6 +485,34 @@ export default function App() {
       setSelectedScreenshot(null);
     } catch (error) {
       console.error("Error deleting screenshot:", error);
+    }
+  };
+
+  const handleDeleteBoard = async (boardId: string) => {
+    if (!user) return;
+    try {
+      await deleteBoard(user.uid, boardId);
+      setBoards(boards.filter(b => b.id !== boardId));
+      if (selectedBoard?.id === boardId) {
+        setView('boards');
+        setSelectedBoard(null);
+      }
+    } catch (error) {
+      console.error("Error deleting board:", error);
+    }
+  };
+
+  const handleDeleteMoodboard = async (moodboardId: string) => {
+    if (!user) return;
+    try {
+      await deleteMoodboard(user.uid, moodboardId);
+      setMoodboards(moodboards.filter(m => m.id !== moodboardId));
+      if (selectedMoodboard?.id === moodboardId) {
+        setView('moodboards');
+        setSelectedMoodboard(null);
+      }
+    } catch (error) {
+      console.error("Error deleting moodboard:", error);
     }
   };
 
@@ -552,6 +591,7 @@ export default function App() {
                     onSelectScreenshot={setSelectedScreenshot} 
                     onDeleteScreenshot={handleDeleteScreenshot}
                     onUpdateScreenshot={handleUpdateScreenshot}
+                    onOpenUpload={() => setIsUploadOpen(true)}
                   />
                 )}
                 {view === 'boards' && (
@@ -586,6 +626,7 @@ export default function App() {
                     onAddExistingToSmartFolder={handleAddExistingToSmartFolder}
                     onUploadNewToSmartFolder={handleUploadNewToSmartFolder}
                     onDeleteScreenshot={handleDeleteScreenshot}
+                    onDeleteBoard={handleDeleteBoard}
                   />
                 )}
                 {view === 'search' && (
@@ -622,6 +663,7 @@ export default function App() {
                     onUploadNewToMoodboard={handleUploadNewToMoodboard}
                     onRemoveFromMoodboard={handleRemoveFromMoodboard}
                     onReorderMoodboard={handleReorderMoodboard}
+                    onDeleteMoodboard={handleDeleteMoodboard}
                   />
                 )}
               </>
@@ -641,6 +683,7 @@ export default function App() {
 
       {isUploadOpen && (
         <UploadModal 
+          boards={boards}
           onClose={() => setIsUploadOpen(false)} 
           onComplete={handleUploadComplete} 
         />

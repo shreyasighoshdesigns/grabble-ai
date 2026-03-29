@@ -96,10 +96,10 @@ export function SearchResults({ query, screenshots, onSelectScreenshot, isFilter
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-200">
-        <div className="flex items-center gap-3">
-          <Sparkles className="w-6 h-6 text-[#a3e635]" />
-          <h2 className="text-2xl font-bold tracking-tight text-zinc-900">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 pb-4 sm:pb-6 border-b border-zinc-200">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-[#a3e635] shrink-0" />
+          <h2 className="text-lg sm:text-2xl font-bold tracking-tight text-zinc-900 truncate">
             {query ? `AI Results for "${query}"` : "All Screenshots"}
           </h2>
         </div>

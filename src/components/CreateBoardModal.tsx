@@ -17,18 +17,18 @@ export function CreateBoardModal({ onClose, onComplete }: CreateBoardModalProps)
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-6">
       <div className="absolute inset-0 bg-zinc-900/60 backdrop-blur-sm" onClick={onClose} />
-      
-      <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
-          <h2 className="text-xl font-bold text-zinc-900">Create New Folder</h2>
+
+      <div className="relative bg-white rounded-t-2xl sm:rounded-3xl shadow-2xl w-full max-w-md flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-4 sm:zoom-in-95 duration-200">
+        <div className="flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-zinc-100">
+          <h2 className="text-lg sm:text-xl font-bold text-zinc-900">Create New Folder</h2>
           <button onClick={onClose} className="p-2 text-zinc-400 hover:bg-zinc-100 rounded-full transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+        <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-6">
           <div>
             <label htmlFor="boardName" className="block text-sm font-semibold text-zinc-900 mb-2">
               Folder Name

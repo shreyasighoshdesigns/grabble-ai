@@ -119,19 +119,19 @@ export function AddToFolderModal({ onClose, onAddExisting, onUploadNew, screensh
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
-        <div className="flex items-center justify-between p-6 border-b border-zinc-100">
-          <h2 className="text-xl font-bold text-zinc-900">Add to Folder</h2>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:p-4">
+      <div className="bg-white rounded-t-2xl sm:rounded-3xl w-full max-w-3xl max-h-[95dvh] sm:max-h-[90vh] flex flex-col shadow-2xl overflow-hidden">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-zinc-100">
+          <h2 className="text-lg sm:text-xl font-bold text-zinc-900">Add to Folder</h2>
           <button onClick={onClose} className="p-2 hover:bg-zinc-100 rounded-full transition-colors">
             <X className="w-5 h-5 text-zinc-500" />
           </button>
         </div>
 
-        <div className="flex border-b border-zinc-100 px-6">
+        <div className="flex border-b border-zinc-100 px-4 sm:px-6">
           <button
             onClick={() => setActiveTab('existing')}
-            className={`px-4 py-4 text-sm font-medium border-b-2 transition-colors ${
+            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'existing' ? 'border-zinc-900 text-zinc-900' : 'border-transparent text-zinc-500 hover:text-zinc-700'
             }`}
           >
@@ -139,7 +139,7 @@ export function AddToFolderModal({ onClose, onAddExisting, onUploadNew, screensh
           </button>
           <button
             onClick={() => setActiveTab('upload')}
-            className={`px-4 py-4 text-sm font-medium border-b-2 transition-colors ${
+            className={`px-3 sm:px-4 py-3 sm:py-4 text-sm font-medium border-b-2 transition-colors ${
               activeTab === 'upload' ? 'border-zinc-900 text-zinc-900' : 'border-transparent text-zinc-500 hover:text-zinc-700'
             }`}
           >
@@ -147,11 +147,11 @@ export function AddToFolderModal({ onClose, onAddExisting, onUploadNew, screensh
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {activeTab === 'existing' ? (
             <div className="space-y-6">
               {availableScreenshots.length > 0 ? (
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 sm:gap-4">
                   {availableScreenshots.map(screenshot => (
                     <div 
                       key={screenshot.id}
@@ -182,7 +182,7 @@ export function AddToFolderModal({ onClose, onAddExisting, onUploadNew, screensh
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
               onClick={() => fileInputRef.current?.click()}
-              className={`border-2 border-dashed rounded-2xl p-12 flex flex-col items-center justify-center text-center cursor-pointer transition-colors ${
+              className={`border-2 border-dashed rounded-2xl p-8 sm:p-12 flex flex-col items-center justify-center text-center cursor-pointer transition-colors ${
                 isDragging ? 'border-[#a3e635] bg-[#f4fce3]' : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
               }`}
             >
@@ -218,7 +218,7 @@ export function AddToFolderModal({ onClose, onAddExisting, onUploadNew, screensh
         </div>
 
         {activeTab === 'existing' && (
-          <div className="p-6 border-t border-zinc-100 flex justify-end gap-3">
+          <div className="p-4 sm:p-6 border-t border-zinc-100 flex justify-end gap-2 sm:gap-3">
             <button
               onClick={onClose}
               className="px-5 py-2.5 text-sm font-medium text-zinc-600 hover:bg-zinc-100 rounded-xl transition-colors"

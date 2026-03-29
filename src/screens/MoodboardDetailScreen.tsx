@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Screenshot, Moodboard, MoodboardItem } from '../types';
-import { ArrowLeft, MoreHorizontal, Share2, Sparkles, LayoutGrid, Type as TypeIcon, Download, Palette } from 'lucide-react';
+import { ArrowLeft, Share2, Sparkles, LayoutGrid, Type as TypeIcon, Download, Palette, Trash2 } from 'lucide-react';
 import { MoodboardCanvas } from '../components/MoodboardCanvas';
 import { updateMoodboard } from '../services/firebaseService';
 import { auth } from '../firebase';
@@ -17,6 +17,7 @@ interface MoodboardDetailScreenProps {
   onUploadNewToMoodboard: (moodboardId: string, screenshot: Screenshot) => void;
   onRemoveFromMoodboard: (moodboardId: string, screenshotId: string) => void;
   onReorderMoodboard: (moodboardId: string, newOrder: string[]) => void;
+  onDeleteMoodboard?: (id: string) => void;
 }
 
 export function MoodboardDetailScreen({ 
@@ -26,6 +27,7 @@ export function MoodboardDetailScreen({
   onBack,
   onAddExistingToMoodboard,
   onUploadNewToMoodboard,
+  onDeleteMoodboard
 }: MoodboardDetailScreenProps) {
   
   const [isAiMenuOpen, setIsAiMenuOpen] = useState(false);
@@ -157,35 +159,35 @@ export function MoodboardDetailScreen({
   return (
     <div className="flex flex-col h-full w-full bg-[#FAFAFA]">
       {/* Top Bar */}
-      <div className="flex items-center justify-between px-6 py-4 bg-white/80 backdrop-blur-md border-b border-zinc-200 z-10">
-        <div className="flex items-center gap-4">
-          <button 
+      <div className="flex items-center justify-between px-3 sm:px-6 py-3 sm:py-4 bg-white/80 backdrop-blur-md border-b border-zinc-200 z-10 gap-2">
+        <div className="flex items-center gap-2 sm:gap-4 min-w-0 shrink-0">
+          <button
             onClick={onBack}
-            className="p-2 hover:bg-zinc-100 rounded-full transition-colors"
+            className="p-2 hover:bg-zinc-100 rounded-full transition-colors shrink-0"
           >
             <ArrowLeft className="w-5 h-5 text-zinc-600" />
           </button>
-          <div className="flex flex-col">
-            <input 
-              type="text" 
+          <div className="flex flex-col min-w-0">
+            <input
+              type="text"
               defaultValue={moodboard.name}
               onBlur={(e) => {
                 if (auth.currentUser && e.target.value !== moodboard.name) {
                   updateMoodboard(auth.currentUser.uid, { ...moodboard, name: e.target.value });
                 }
               }}
-              className="text-xl font-bold tracking-tight text-zinc-900 bg-transparent border-none outline-none hover:bg-zinc-50 focus:bg-zinc-50 rounded px-2 py-1 -ml-2 transition-colors"
+              className="text-base sm:text-xl font-bold tracking-tight text-zinc-900 bg-transparent border-none outline-none hover:bg-zinc-50 focus:bg-zinc-50 rounded px-2 py-1 -ml-2 transition-colors w-full min-w-0"
             />
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-1.5 sm:gap-3 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] shrink-0">
           <div className="relative" ref={bgMenuRef}>
-            <button 
+            <button
               onClick={() => setIsBgMenuOpen(!isBgMenuOpen)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors shadow-sm"
+              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors shadow-sm whitespace-nowrap"
             >
               <Palette className="w-4 h-4" />
-              Background
+              <span className="hidden sm:inline">Background</span>
             </button>
             
             {isBgMenuOpen && (
@@ -287,12 +289,12 @@ export function MoodboardDetailScreen({
           </div>
 
           <div className="relative" ref={downloadMenuRef}>
-            <button 
+            <button
               onClick={() => setIsDownloadMenuOpen(!isDownloadMenuOpen)}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors shadow-sm"
+              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors shadow-sm whitespace-nowrap"
             >
               <Download className="w-4 h-4" />
-              Download
+              <span className="hidden sm:inline">Download</span>
             </button>
             
             {isDownloadMenuOpen && (
@@ -313,25 +315,26 @@ export function MoodboardDetailScreen({
             )}
           </div>
 
-          <button 
+          <button
             onClick={() => {
               navigator.clipboard.writeText(window.location.href);
               alert('Link copied to clipboard!');
             }}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors shadow-sm"
+            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 text-sm font-medium text-zinc-700 bg-white border border-zinc-200 rounded-xl hover:bg-zinc-50 transition-colors shadow-sm whitespace-nowrap"
           >
             <Share2 className="w-4 h-4" />
-            Share
+            <span className="hidden sm:inline">Share</span>
           </button>
           
           <div className="relative" ref={aiMenuRef}>
-            <button 
+            <button
               onClick={() => setIsAiMenuOpen(!isAiMenuOpen)}
               disabled={isGenerating}
-              className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#84cc16] rounded-xl hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50"
+              className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2 text-sm font-medium text-white bg-[#84cc16] rounded-xl hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50 whitespace-nowrap"
             >
               <Sparkles className="w-4 h-4" />
-              {isGenerating ? 'Generating...' : 'AI Actions'}
+              <span className="hidden sm:inline">{isGenerating ? 'Generating...' : 'AI Actions'}</span>
+              <span className="sm:hidden">{isGenerating ? '...' : 'AI'}</span>
             </button>
             
             {isAiMenuOpen && (
@@ -354,12 +357,19 @@ export function MoodboardDetailScreen({
             )}
           </div>
 
-          <button
-            className="p-2 hover:bg-zinc-100 rounded-full transition-colors text-zinc-600 ml-2"
-            title="More Options"
-          >
-            <MoreHorizontal className="w-5 h-5" />
-          </button>
+          {onDeleteMoodboard && (
+            <button
+              onClick={() => {
+                if (window.confirm('Are you sure you want to delete this moodboard?')) {
+                  onDeleteMoodboard(moodboard.id);
+                }
+              }}
+              className="flex items-center justify-center p-2.5 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-xl transition-colors"
+              title="Delete Moodboard"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          )}
         </div>
       </div>
 

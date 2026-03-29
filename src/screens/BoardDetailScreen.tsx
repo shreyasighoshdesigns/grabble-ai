@@ -1,7 +1,7 @@
 import { useState } from 'react';
-import { Screenshot, Board, SmartFolder } from '../types';
+import { Screenshot, Board, SmartFolder, normalizeScreenType } from '../types';
 import { HomeFeed } from './HomeFeed';
-import { ArrowLeft, Plus } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { AddToFolderModal } from '../components/AddToFolderModal';
 
 interface BoardDetailScreenProps {
@@ -15,6 +15,7 @@ interface BoardDetailScreenProps {
   onAddExistingToSmartFolder?: (folder: SmartFolder, screenshotIds: string[]) => void;
   onUploadNewToSmartFolder?: (folder: SmartFolder, screenshot: Screenshot) => void;
   onDeleteScreenshot?: (id: string) => void;
+  onDeleteBoard?: (id: string) => void;
 }
 
 export function BoardDetailScreen({ 
@@ -27,7 +28,8 @@ export function BoardDetailScreen({
   onUploadNewToBoard,
   onAddExistingToSmartFolder,
   onUploadNewToSmartFolder,
-  onDeleteScreenshot
+  onDeleteScreenshot,
+  onDeleteBoard
 }: BoardDetailScreenProps) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
@@ -44,7 +46,7 @@ export function BoardDetailScreen({
   } else if (smartFolder) {
     filteredScreenshots = screenshots.filter(s => 
       smartFolder.type === 'screenType' 
-        ? s.screenType === smartFolder.value 
+        ? normalizeScreenType(s.screenType) === smartFolder.value 
         : s.components?.includes(smartFolder.value)
     );
     title = smartFolder.name;
@@ -70,28 +72,44 @@ export function BoardDetailScreen({
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
-          <button 
-            onClick={onBack}
-            className="p-2 hover:bg-zinc-100 rounded-full transition-colors"
-          >
-            <ArrowLeft className="w-6 h-6 text-zinc-900" />
-          </button>
-          <div>
-            <h2 className="text-3xl font-bold tracking-tight text-zinc-900">{title}</h2>
-            <p className="text-sm text-zinc-500">{subtitle}</p>
+    <div className="space-y-4 sm:space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-8 w-full gap-3">
+          <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+            <button
+              onClick={onBack}
+              className="p-2 hover:bg-zinc-100 rounded-full transition-colors shrink-0"
+            >
+              <ArrowLeft className="w-5 h-5 sm:w-6 sm:h-6 text-zinc-900" />
+            </button>
+            <div className="min-w-0">
+              <h2 className="text-xl sm:text-3xl font-bold tracking-tight text-zinc-900 truncate">{title}</h2>
+              <p className="text-xs sm:text-sm text-zinc-500">{subtitle}</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 ml-11 sm:ml-0">
+            {board && onDeleteBoard && (
+              <button
+                onClick={() => {
+                  if (window.confirm('Are you sure you want to delete this folder?')) {
+                    onDeleteBoard(board.id);
+                  }
+                }}
+                className="flex items-center justify-center p-2.5 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 rounded-xl transition-colors"
+                title="Delete Folder"
+              >
+                <Trash2 className="w-5 h-5" />
+              </button>
+            )}
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center gap-2 bg-zinc-900 hover:bg-[#84cc16] text-white hover:text-zinc-900 px-4 sm:px-5 py-2 sm:py-2.5 rounded-xl text-sm font-bold transition-colors"
+            >
+              <Plus className="w-4 h-4 text-inherit" />
+              <span className="hidden sm:inline">Add Screenshots</span>
+              <span className="sm:hidden">Add</span>
+            </button>
           </div>
         </div>
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 bg-zinc-900 hover:bg-[#84cc16] text-white px-4 py-2 rounded-xl text-sm font-medium transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          Add Screenshots
-        </button>
-      </div>
 
       {filteredScreenshots.length > 0 ? (
         <HomeFeed 

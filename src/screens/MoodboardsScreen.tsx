@@ -169,28 +169,48 @@ export function MoodboardsScreen({
 
   return (
     <div className="space-y-10">
-      <div className="flex flex-col items-center mb-10">
-        <h2 className="text-3xl font-bold tracking-tight text-zinc-900 mb-2">Moodboards</h2>
-        <p className="text-zinc-500 text-center max-w-lg">
-          Visually organize screenshots and inspiration into boards for projects, themes, and case studies.
-        </p>
+      <div className="flex items-start sm:items-center justify-between mb-6 sm:mb-10 w-full gap-3">
+        <div className="flex flex-col items-start min-w-0">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 mb-1 sm:mb-2">Moodboards</h2>
+          <p className="text-sm sm:text-base text-zinc-500 text-left max-w-lg">
+            Visually organize screenshots and inspiration into boards for projects, themes, and case studies.
+          </p>
+        </div>
+        <button
+          onClick={onCreateMoodboard}
+          className="px-4 sm:px-6 py-2 sm:py-2.5 bg-zinc-900 text-[#a3e635] text-sm font-bold rounded-full hover:bg-zinc-800 shadow-sm transition-colors whitespace-nowrap shrink-0"
+        >
+          Create
+        </button>
       </div>
 
-      <div>
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <button className="px-4 py-2 bg-[#a3e635] text-zinc-900 font-bold text-sm font-medium rounded-xl">
-              All Moodboards
-            </button>
+      {moodboards.length === 0 && screenshots.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 px-4 min-h-[50vh]">
+          <div className="relative w-48 h-48 mb-8 group">
+            <div className="absolute inset-2 bg-purple-100 border-2 border-zinc-900 rounded-3xl shadow-[4px_4px_0px_#27272a] transform rotate-3 group-hover:rotate-6 transition-transform duration-300"></div>
+            <div className="absolute inset-2 bg-white border-2 border-zinc-900 rounded-3xl flex items-center justify-center shadow-[4px_4px_0px_#27272a] transform -rotate-2 group-hover:-rotate-4 transition-transform duration-300 p-4">
+               <div className="w-full h-full border-2 border-zinc-900 bg-zinc-50 rounded-2xl overflow-hidden shadow-[4px_4px_0px_#27272a] flex flex-col group-hover:scale-105 transition-transform duration-300">
+                 <div className="h-6 border-b-2 border-zinc-900 bg-purple-300 flex items-center px-3">
+                   <div className="w-2.5 h-2.5 rounded-full bg-white border-2 border-zinc-900" />
+                 </div>
+                 <div className="flex-1 p-2 flex gap-2 w-full">
+                    <div className="w-1/2 h-full border-2 border-zinc-900 bg-rose-200 rounded-xl"></div>
+                    <div className="w-1/2 h-full flex flex-col gap-2">
+                      <div className="w-full h-1/2 border-2 border-zinc-900 bg-yellow-200 rounded-xl"></div>
+                      <div className="w-full h-1/2 border-2 border-zinc-900 bg-blue-200 rounded-xl"></div>
+                    </div>
+                 </div>
+               </div>
+            </div>
           </div>
-          <button 
-            onClick={onCreateMoodboard}
-            className="px-4 py-2 bg-[#84cc16] text-white text-sm font-medium rounded-full hover:bg-indigo-700 transition-colors flex items-center gap-2"
-          >
-            <Plus className="w-4 h-4" />
-            Create
-          </button>
+          <h3 className="text-2xl font-extrabold text-zinc-900 mb-2">Blank canvas awaiting</h3>
+          <p className="text-zinc-500 font-medium text-center max-w-sm">
+            Upload your first designs and start curating your next brilliant moodboard.
+          </p>
         </div>
+      ) : (
+        <div>
+
 
         <DndContext 
           sensors={sensors}
@@ -202,18 +222,7 @@ export function MoodboardsScreen({
             strategy={rectSortingStrategy}
           >
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {/* Create Moodboard Card */}
-              <div 
-                onClick={onCreateMoodboard}
-                className="group cursor-pointer flex flex-col"
-              >
-                <div className="aspect-[4/3] bg-zinc-100 rounded-2xl overflow-hidden relative mb-2 flex items-center justify-center hover:bg-zinc-200 transition-colors border-2 border-dashed border-zinc-300">
-                  <div className="bg-white p-3 rounded-full shadow-sm text-zinc-900">
-                    <Plus className="w-6 h-6" />
-                  </div>
-                </div>
-                <h3 className="font-semibold text-zinc-900 text-sm">New Moodboard</h3>
-              </div>
+
 
               {/* Moodboard Cards */}
               {sortedMoodboards.map(moodboard => (
@@ -229,6 +238,7 @@ export function MoodboardsScreen({
           </SortableContext>
         </DndContext>
       </div>
+      )}
     </div>
   );
 }

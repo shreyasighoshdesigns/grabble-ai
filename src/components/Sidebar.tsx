@@ -1,5 +1,4 @@
 import { Home, LayoutGrid, PlusCircle, Search, Sparkles, Folder, ChevronDown, ChevronRight, Palette } from 'lucide-react';
-import { LogoIcon } from './LogoIcon';
 import { ViewState } from '../App';
 import { Board, SmartFolder, Moodboard } from '../types';
 import { useState } from 'react';
@@ -34,17 +33,14 @@ export function Sidebar({
   onSelectMoodboard
 }: SidebarProps) {
   const [dragOverBoardId, setDragOverBoardId] = useState<string | null>(null);
-  const [isYourFoldersExpanded, setIsYourFoldersExpanded] = useState(true);
-  const [isSmartFoldersExpanded, setIsSmartFoldersExpanded] = useState(true);
+  const [isYourFoldersExpanded, setIsYourFoldersExpanded] = useState(false);
+  const [isSmartFoldersExpanded, setIsSmartFoldersExpanded] = useState(false);
 
   return (
     <aside className="w-64 bg-zinc-950 bg-gradient-to-b from-white/[0.03] to-transparent border-r border-zinc-800 flex flex-col h-full hidden md:flex relative overflow-hidden shadow-[inset_0_1px_0_rgba(255,255,255,0.05)]">
       <div className="p-6 relative z-10 w-full select-none cursor-pointer group">
         <div className="flex items-center text-white leading-none relative">
-          <LogoIcon className="w-[2.5rem] h-[2.5rem] shrink-0 text-[#56e379] transition-transform group-hover:scale-105 z-10 translate-y-[0.15rem]" />
-          <span className="relative text-[1.8rem] font-['Poppins'] font-bold tracking-tight -ml-1.5 mt-1 z-10 block">
-            rabble AI
-          </span>
+          <img src="/grabble-logo-dark.png" alt="Grabble AI Logo" className="h-[2.5rem] transition-transform group-hover:scale-105 z-10 object-contain" />
         </div>
       </div>
 

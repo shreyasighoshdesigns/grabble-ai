@@ -34,7 +34,7 @@ export async function analyzeScreenshot(
 
   try {
     const response = await aiInstance.models.generateContent({
-      model: "gemini-3.1-flash-lite-preview", // Use safer, faster model
+      model: "gemini-2.5-flash", // Use safer, faster model
       contents: {
         parts: [
           {
@@ -62,7 +62,7 @@ Return a JSON object precisely matching the schema:
           properties: {
             title: { type: Type.STRING, description: "A short descriptive title" },
             tags: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3-5 relevant industry/category tags" },
-            screenType: { type: Type.STRING, description: "Primary screen type" },
+            screenType: { type: Type.STRING, description: "MUST be one of: Homepage, Dashboard, PDP, Checkout, Login, Onboarding, Settings, Profile, Search, Feed, Article, Pricing, Modal, Catalog, Success, Form, Chat, Empty State" },
             category: { type: Type.STRING, description: "Either 'Web' or 'Mobile'" },
             components: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3-5 key UI components" },
             colorPalette: { type: Type.ARRAY, items: { type: Type.STRING }, description: "3-5 dominant hex color codes" },
@@ -121,7 +121,7 @@ export async function findSimilarScreenshots(base64Image: string, mimeType: stri
   }));
 
   const response = await aiInstance.models.generateContent({
-    model: "gemini-3.1-pro-preview",
+    model: "gemini-2.5-flash",
     contents: {
       parts: [
         {
@@ -159,7 +159,7 @@ export async function categorizeScreenshot(base64Image: string, mimeType: string
 
   try {
     const response = await aiInstance.models.generateContent({
-      model: "gemini-3.1-flash-lite-preview",
+      model: "gemini-2.5-flash",
       contents: {
         parts: [
           { inlineData: { data: base64Image, mimeType: mimeType } },
@@ -208,7 +208,7 @@ export async function searchScreenshots(query: string, screenshots: Screenshot[]
   }));
 
   const response = await aiInstance.models.generateContent({
-    model: "gemini-3.1-flash-lite-preview",
+    model: "gemini-2.5-flash",
     contents: `Given the user query "${query}", find the best matching screenshots from this list: ${JSON.stringify(screenshotsContext)}. Return ONLY a JSON array of screenshot IDs ordered by relevance. If none match well, return an empty array.`,
     config: {
       responseMimeType: "application/json",
